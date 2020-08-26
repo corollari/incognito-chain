@@ -916,7 +916,8 @@ func (beaconBestState *BeaconBestState) initBeaconBestState(genesisBeaconBlock *
 //		+ doesn't call any of methods provided by blockchain object.
 //		+ variables get from blockchain object are golang built-in types
 //		+ easier for functional testing
-//	-
+//	- Typo error?
+//		+ len(beaconCandidatesStructs) != len(beaconRewardReceivers) && len(beaconRewardReceivers) != len(beaconAutoReStaking) AND len(shardCandidates) != len(shardRewardReceivers) && len(shardRewardReceivers) != len(shardAutoReStaking) should be || instead of &&
 //
 func (beaconBestState *BeaconBestState) processInstruction(instruction []string, blockchain *BlockChain, committeeChange *committeeChange, autoStaking map[string]bool) (error, bool, []incognitokey.CommitteePublicKey, []incognitokey.CommitteePublicKey) {
 	newBeaconCandidates := []incognitokey.CommitteePublicKey{}
