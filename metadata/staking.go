@@ -47,13 +47,9 @@ func NewStakingMetadata(
 	}, nil
 }
 
-/*
- */
-// REVIEW: @hung
-// - REDUCE_CHECK:
-//		+ no need to IsInBase58ShortFormat because error is already check below by FromString
-//		+ what IsInBase58ShortFormat does is the same as FromString does but for an array
-//		+ should we check FunderPaymentAddress?
+// TODO: REDUCE_CHECK:
+//	+ no need to IsInBase58ShortFormat because error is already check below by FromString
+//	+ what IsInBase58ShortFormat does is the same as FromString does but for an array
 func (sm *StakingMetadata) ValidateMetadataByItself() bool {
 	rewardReceiverPaymentAddress := sm.RewardReceiverPaymentAddress
 	rewardReceiverWallet, err := wallet.Base58CheckDeserialize(rewardReceiverPaymentAddress)
@@ -73,13 +69,10 @@ func (sm *StakingMetadata) ValidateMetadataByItself() bool {
 	if !CommitteePublicKey.CheckSanityData() {
 		return false
 	}
-	//return (sm.Type == ShardStakingMeta || sm.Type == BeaconStakingMeta)
 	// only stake to shard
 	return sm.Type == ShardStakingMeta
 }
 
-// REVIEW: @hung
-// - This func GetAllCommitteeValidatorCandidate doesn't return any err (check implementation at retrieverformetadata.go)
 func (stakingMetadata StakingMetadata) ValidateTxWithBlockChain(txr Transaction, bcr BlockchainRetriever, b byte, stateDB *statedb.StateDB) (bool, error) {
 	SC, SPV, BC, BPV, CBWFCR, CBWFNR, CSWFCR, CSWFNR, err := bcr.GetAllCommitteeValidatorCandidate()
 	if err != nil {
@@ -107,16 +100,11 @@ func (stakingMetadata StakingMetadata) ValidateTxWithBlockChain(txr Transaction,
 	return true, nil
 }
 
-/*
-	// Have only one receiver
-	// Have only one amount corresponding to receiver
-	// Receiver Is Burning Address
-	//
-*/
-// REVIEW: @hung
-// - bcr.GetStakingAmountShard()*3, 3 should be set as a constants elsewhere (same for method GetBeaconStakeAmount of stakingMetadata - below) or implement a seperate method for Beacon, reason: easy to find and change
-// - only one of these 2 combinations of 'true, true' and 'false, false' is return instead of 4 possible combinations -> only return true or false and error is enough
-// - stakingMetadata.Type is ShardStakingMeta or BeaconStakingMeta before other
+// ValidateSanityData
+// Have only one receiver
+// Have only one amount corresponding to receiver
+// Receiver Is Burning Address
+// TODO: only one of these 2 combinations of 'true, true' and 'false, false' is return instead of 4 possible combinations -> only return true or false and error is enough
 func (stakingMetadata StakingMetadata) ValidateSanityData(
 	bcr BlockchainRetriever,
 	txr Transaction,
@@ -184,8 +172,6 @@ func (stakingMetadata *StakingMetadata) CalculateSize() uint64 {
 	return calculateSize(stakingMetadata)
 }
 
-// REVIEW: @hung
-// 3 should be set as a constants elsewhere
 func (stakingMetadata StakingMetadata) GetBeaconStakeAmount() uint64 {
 	return stakingMetadata.StakingAmountShard * 3
 }
