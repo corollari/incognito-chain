@@ -95,7 +95,7 @@ func (blockchain *BlockChain) InsertBeaconBlock(beaconBlock *BeaconBlock, should
 	skipBlock := false
 	if skipBlock {
 		for _, inst := range beaconBlock.Body.Instructions {
-			if inst[0] == strconv.Itoa(metadata.BurningConfirmMetaV2) {
+			if inst[0] == strconv.Itoa(metadata.BurningConfirmMetaV2) || inst[0] == strconv.Itoa(metadata.BurningConfirmForDepositToSCMetaV2) {
 				Logger.log.Infof("found block %d, skipping insert with meta: %+v", beaconBlock.Header.Height, inst)
 				return fmt.Errorf("sorry, but no")
 			}
