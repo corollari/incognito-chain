@@ -164,30 +164,30 @@ func TransferPRV(tool *debugtool.DebugTool, fromPrivKey, toPrivKey, amount strin
 	fmt.Println("========== END TRANSFER PRV  ==========")
 }
 
-func DoubleSpendPRV(tool *debugtool.DebugTool, fromPrivKey, toPrivKey, amount string, isPrivacy bool) {
+func DoubleSpendPRV(tool *debugtool.DebugTool, fromPrivKey, paymentAddress, amount string, isPrivacy bool) {
 	// fmt.Println("========== TRANSFER PRV (DOUBLE SPEND - TEST) ==========")
-	b, _ := tool.CreateDoubleSpend(fromPrivKey, toPrivKey, amount, isPrivacy)
+	b, _ := tool.CreateDoubleSpend(fromPrivKey, paymentAddress, amount, isPrivacy)
 	fmt.Println(string(b))
 	// fmt.Println("========== END TRANSFER PRV (DOUBLE SPEND - TEST) ==========")
 }
 
-func DoubleSpendToken(tool *debugtool.DebugTool, fromPrivKey, toPrivKey, tokenID string, amount string, isPrivacy bool) {
+func DoubleSpendToken(tool *debugtool.DebugTool, fromPrivKey, paymentAddress, tokenID string, amount string, isPrivacy bool) {
 	// fmt.Println("========== TRANSFER PRV (DOUBLE SPEND TOKEN - TEST) ==========")
-	b, _ := tool.CreateDoubleSpendToken(fromPrivKey, toPrivKey, tokenID, amount, isPrivacy)
+	b, _ := tool.CreateDoubleSpendToken(fromPrivKey, paymentAddress, tokenID, amount, isPrivacy)
 	fmt.Println(string(b))
 	// fmt.Println("========== END TRANSFER PRV (DOUBLE SPEND TOKEN - TEST) ==========")
 }
 
-func DoCreateDuplicateInputTx(tool *debugtool.DebugTool, fromPrivKey, toPrivKey, amount string, isPrivacy bool) {
+func DoCreateDuplicateInputTx(tool *debugtool.DebugTool, fromPrivKey, paymentAddress, amount string, isPrivacy bool) {
 	// fmt.Println("========== TRANSFER PRV (DUP INPUT - TEST) ==========")
-	b, _ := tool.CreateDuplicateInput(fromPrivKey, toPrivKey, amount, isPrivacy)
+	b, _ := tool.CreateDuplicateInput(fromPrivKey, paymentAddress, amount, isPrivacy)
 	fmt.Println(string(b))
 	// fmt.Println("========== END TRANSFER PRV (DUP INPUT - TEST) ==========")
 }
 
-func DoCreateDuplicateInputTokenTx(tool *debugtool.DebugTool, fromPrivKey, toPrivKey, tokenID string, amount string, isPrivacy bool) {
+func DoCreateDuplicateInputTokenTx(tool *debugtool.DebugTool, fromPrivKey, paymentAddress, tokenID string, amount string, isPrivacy bool) {
 	// fmt.Println("========== TRANSFER PRV (DUPLICATE INPUT TOKEN - TEST) ==========")
-	b, _ := tool.CreateDuplicateInputToken(fromPrivKey, toPrivKey, tokenID, amount, isPrivacy)
+	b, _ := tool.CreateDuplicateInputToken(fromPrivKey, paymentAddress, tokenID, amount, isPrivacy)
 	fmt.Println(string(b))
 	// fmt.Println("========== END TRANSFER PRV (DUPLICATE INPUT TOKEN - TEST) ==========")
 }
@@ -650,34 +650,68 @@ func main() {
 		}
 
 		if args[0] == "doublespend" {
-			indexFrom, err := strconv.ParseInt(args[1], 10, 32)
-			if err != nil {
-				panic(err)
+			if len(args) < 4 {
+				panic("Need at least 4 arguments")
 			}
-			indexTo, err := strconv.ParseInt(args[2], 10, 32)
-			if err != nil {
-				panic(err)
+
+			var privateKey string
+			if len(args[1]) < 3{
+				indexFrom, err := strconv.ParseInt(args[1], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				privateKey = privateKeys[indexFrom]
+			}else{
+				privateKey = args[1]
 			}
+			var paymentAddress string
+			if len(args[2]) < 3{
+				indexTo, err := strconv.ParseInt(args[2], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				paymentAddress = privateKeyToPaymentAddress(privateKeys[indexTo])
+			}else{
+				paymentAddress = args[2]
+			}
+
 			isPriv := false
 			if len(args) > 4 && args[4]=="1"{
 				isPriv = true
 			}
-			DoubleSpendPRV(tool, privateKeys[indexFrom], privateKeys[indexTo], args[3], isPriv)
+			DoubleSpendPRV(tool, privateKey, paymentAddress, args[3], isPriv)
 		}
 		if args[0] == "dupinput" {
-			indexFrom, err := strconv.ParseInt(args[1], 10, 32)
-			if err != nil {
-				panic(err)
+			if len(args) < 4 {
+				panic("Need at least 4 arguments")
 			}
-			indexTo, err := strconv.ParseInt(args[2], 10, 32)
-			if err != nil {
-				panic(err)
+
+			var privateKey string
+			if len(args[1]) < 3{
+				indexFrom, err := strconv.ParseInt(args[1], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				privateKey = privateKeys[indexFrom]
+			}else{
+				privateKey = args[1]
 			}
+			var paymentAddress string
+			if len(args[2]) < 3{
+				indexTo, err := strconv.ParseInt(args[2], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				paymentAddress = privateKeyToPaymentAddress(privateKeys[indexTo])
+			}else{
+				paymentAddress = args[2]
+			}
+
 			isPriv := false
 			if len(args) > 4 && args[4]=="1"{
 				isPriv = true
 			}
-			DoCreateDuplicateInputTx(tool, privateKeys[indexFrom], privateKeys[indexTo], args[3], isPriv)
+			DoCreateDuplicateInputTx(tool, privateKey, paymentAddress, args[3], isPriv)
 		}
 		if args[0] == "outgtin" {
 			indexFrom, err := strconv.ParseInt(args[1], 10, 32)
@@ -705,37 +739,74 @@ func main() {
 			if len(args) < 5 {
 				panic("Not enough params for transfertoken")
 			}
-			indexFrom, err := strconv.ParseInt(args[1], 10, 32)
-			if err != nil {
-				panic(err)
+			if len(args) < 4 {
+				panic("Need at least 4 arguments")
 			}
-			indexTo, err := strconv.ParseInt(args[2], 10, 32)
-			if err != nil {
-				panic(err)
+
+			var privateKey string
+			if len(args[1]) < 3{
+				indexFrom, err := strconv.ParseInt(args[1], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				privateKey = privateKeys[indexFrom]
+			}else{
+				privateKey = args[1]
 			}
+			var paymentAddress string
+			if len(args[2]) < 3{
+				indexTo, err := strconv.ParseInt(args[2], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				paymentAddress = privateKeyToPaymentAddress(privateKeys[indexTo])
+			}else{
+				paymentAddress = args[2]
+			}
+
 			isPriv := false
 			if len(args) > 5 && args[5]=="1"{
 				isPriv = true
 			}
-			DoubleSpendToken(tool, privateKeys[indexFrom], privateKeys[indexTo], args[3], args[4], isPriv)
+			DoubleSpendToken(tool, privateKey, paymentAddress, args[3], args[4], isPriv)
 		}
 		if args[0] == "dupinputtoken"{
 			if len(args) < 5 {
 				panic("Not enough params for transfertoken")
 			}
-			indexFrom, err := strconv.ParseInt(args[1], 10, 32)
-			if err != nil {
-				panic(err)
+			if len(args) < 5 {
+				panic("Not enough params for transfertoken")
 			}
-			indexTo, err := strconv.ParseInt(args[2], 10, 32)
-			if err != nil {
-				panic(err)
+			if len(args) < 4 {
+				panic("Need at least 4 arguments")
 			}
+
+			var privateKey string
+			if len(args[1]) < 3{
+				indexFrom, err := strconv.ParseInt(args[1], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				privateKey = privateKeys[indexFrom]
+			}else{
+				privateKey = args[1]
+			}
+			var paymentAddress string
+			if len(args[2]) < 3{
+				indexTo, err := strconv.ParseInt(args[2], 10, 32)
+				if err != nil {
+					panic(err)
+				}
+				paymentAddress = privateKeyToPaymentAddress(privateKeys[indexTo])
+			}else{
+				paymentAddress = args[2]
+			}
+
 			isPriv := false
 			if len(args) > 5 && args[5]=="1"{
 				isPriv = true
 			}
-			DoCreateDuplicateInputTokenTx(tool, privateKeys[indexFrom], privateKeys[indexTo], args[3], args[4], isPriv)
+			DoCreateDuplicateInputTokenTx(tool, privateKey, paymentAddress, args[3], args[4], isPriv)
 		}
 
 		if args[0] == "noprivacynosig"{

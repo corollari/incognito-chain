@@ -23,7 +23,8 @@ func (this *DebugTool) InitTestnet() *DebugTool {
 	if this == nil {
 		this = new(DebugTool)
 	}
-	this.url = "http://51.83.36.184:20002"
+	//this.url = "http://51.83.36.184:20002"
+	this.url = "http://51.161.119.66:9334"
 	return this
 }
 

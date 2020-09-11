@@ -627,17 +627,15 @@ func (this *DebugTool) WithdrawReward(privKey string, tokenID string) ([]byte, e
 	return this.SendPostRequestWithQuery(query)
 }
 
-func (this *DebugTool) CreateDoubleSpend(privKeyA string, privKeyB string, amount string, isPrivacy bool) ([]byte, error) {
+func (this *DebugTool) CreateDoubleSpend(privKeyA string, paymentAddStr string, amount string, isPrivacy bool) ([]byte, error) {
 	amountI,_ := strconv.Atoi(amount)
-	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyB)
-	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
+
 	tx1, err := this.CreateRawTx(privKeyA, paymentAddStr, uint64(amountI), isPrivacy)
 
-	keyWallet, _ = wallet.Base58CheckDeserialize(privKeyA)
+	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyA)
 	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr = keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
-	tx2, err := this.CreateRawTx(privKeyA, paymentAddStr, uint64(amountI), isPrivacy)
+	paymentAddStr2 := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
+	tx2, err := this.CreateRawTx(privKeyA, paymentAddStr2, uint64(amountI), isPrivacy)
 	preJson := []string{EncodeBase58Check(tx1),EncodeBase58Check(tx2)}
 	result, _ := json.Marshal(preJson)
 	return result, err
@@ -666,14 +664,11 @@ func (this *DebugTool) CreateDoubleSpend(privKeyA string, privKeyB string, amoun
 	// return this.SendPostRequestWithQuery(query)
 }
 
-func (this *DebugTool) CreateDuplicateInput(privKeyA string, privKeyB string, amount string, isPrivacy bool) ([]byte, error) {
+func (this *DebugTool) CreateDuplicateInput(privKeyA string, paymentAddStr string, amount string, isPrivacy bool) ([]byte, error) {
 	if len(this.url) == 0 {
 		return []byte{}, errors.New("Debugtool has not set mainnet or testnet")
 	}
 	amountI,_ := strconv.Atoi(amount)
-	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyB)
-	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
 	tx1j, err := this.CreateRawTx(privKeyA, paymentAddStr, uint64(amountI), isPrivacy)
 	if err !=nil{
 		return nil,err
@@ -780,18 +775,15 @@ func (this *DebugTool) CreateOutGtIn(privKeyA string, privKeyB string, amount st
 // 	return this.SendPostRequestWithQuery(query)
 // }
 
-func (this *DebugTool) CreateDoubleSpendToken(privKeyStrA string, privKeyStrB string, tokenID string, amount string, isPrivacy bool) ([]byte, error) {
+func (this *DebugTool) CreateDoubleSpendToken(privKeyStrA string, paymentAddStr string, tokenID string, amount string, isPrivacy bool) ([]byte, error) {
 
 	amountI,_ := strconv.Atoi(amount)
-	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyStrB)
-	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
 	tx1, err := this.CreateRawTxToken(privKeyStrA, tokenID, paymentAddStr, uint64(amountI), true)
 
-	keyWallet, _ = wallet.Base58CheckDeserialize(privKeyStrA)
+	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyStrA)
 	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr = keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
-	tx2, err := this.CreateRawTxToken(privKeyStrA, tokenID, paymentAddStr, uint64(amountI), true)
+	paymentAddStr2 := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
+	tx2, err := this.CreateRawTxToken(privKeyStrA, tokenID, paymentAddStr2, uint64(amountI), true)
 
 	preJson := []string{EncodeBase58Check(tx1),EncodeBase58Check(tx2)}
 	result, _ := json.Marshal(preJson)
@@ -824,14 +816,11 @@ func (this *DebugTool) CreateDoubleSpendToken(privKeyStrA string, privKeyStrB st
 	// return this.SendPostRequestWithQuery(query)
 }
 
-func (this *DebugTool) CreateDuplicateInputToken(privKeyStrA string, privKeyStrB string, tokenID string, amount string, isPrivacy bool) ([]byte, error) {
+func (this *DebugTool) CreateDuplicateInputToken(privKeyStrA string, paymentAddStr string, tokenID string, amount string, isPrivacy bool) ([]byte, error) {
 	if len(this.url) == 0 {
 		return []byte{}, errors.New("Debugtool has not set mainnet or testnet")
 	}
 	amountI,_ := strconv.Atoi(amount)
-	keyWallet, _ := wallet.Base58CheckDeserialize(privKeyStrB)
-	keyWallet.KeySet.InitFromPrivateKey(&keyWallet.KeySet.PrivateKey)
-	paymentAddStr := keyWallet.Base58CheckSerialize(wallet.PaymentAddressType)
 	tx1j, err := this.CreateRawTxToken(privKeyStrA, tokenID, paymentAddStr, uint64(amountI), true)
 	if err !=nil{
 		return nil,err
